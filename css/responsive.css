@@ -1,0 +1,22 @@
+
+
+/* css/responsive.css - small screen tweaks */
+@media (max-width:900px){
+  .hero{flex-direction:column}
+  .hero-right{width:100%;flex-basis:auto}
+  .nav{display:none}
+  .hamburger{display:block}
+  .header-inner{padding:.6rem}
+}
+
+@media (max-width:600px){
+  .filters{flex-direction:column;align-items:stretch}
+  .select,.input{min-width:100%}
+  .hero-title{font-size:1.3rem}
+  .gallery{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+}
+
+/* mobile nav open style (header.js toggles .open on nav) */
+.nav.open{display:flex;flex-direction:column;gap:.6rem;padding:1rem;background:var(--panel);position:absolute;left:0;right:0;top:72px;box-shadow:var(--shadow)}
+
+

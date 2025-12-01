@@ -1,0 +1,22 @@
+
+
+{
+  "name": "pan-african-fashion-lookbook",
+  "version": "1.0.0",
+  "description": "Pan-African Fashion Lookbook — final project (HTML, CSS, vanilla JS)",
+  "main": "index.html",
+  "scripts": {
+    "start": "serve -s .",
+    "lint": "eslint . --ext .js"
+  },
+  "devDependencies": {
+    "eslint": "^8.50.0",
+    "serve": "^14.0.1"
+  },
+  "author": "",
+  "license": "MIT"
+}
+
+
+
+

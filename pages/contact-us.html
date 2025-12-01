@@ -1,0 +1,63 @@
+
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Contact Us - Pan-African Fashion Lookbook</title>
+  <meta name="description" content="Contact Pan-African Fashion Lookbook — say hello or send a designer link" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/responsive.css" />
+</head>
+<body>
+  <div id="root">
+    <!-- header injected -->
+    <main class="container page-content">
+      <section class="page-hero">
+        <h1>Contact Us</h1>
+        <p class="lead">We love to hear from designers, stylists and friends.</p>
+      </section>
+
+      <section class="content contact-grid">
+        <div class="contact-card">
+          <h2>Say hello</h2>
+          <p>If you have a question or want to share a designer, write to us.</p>
+          <p><strong>Email:</strong> info@panafricanfashion.com</p>
+          <p><strong>Location:</strong> Pan-Africa (remote)</p>
+        </div>
+
+        <div class="contact-card">
+          <h2>Send a message</h2>
+          <form id="contactForm" class="contact-form" aria-label="Contact form">
+            <label for="name">Name</label>
+            <input id="name" name="name" required>
+
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" required>
+
+            <label for="message">Message</label>
+            <textarea id="message" name="message" rows="5" required></textarea>
+
+            <button type="submit" class="btn">Send Message</button>
+            <p id="contactStatus" class="small muted" aria-live="polite"></p>
+          </form>
+        </div>
+
+        <div class="map-card" aria-hidden="false">
+          <h2>Map (static)</h2>
+          <img src="../images/hero-image.jpg" alt="Stylized map placeholder" class="map-img" loading="lazy">
+          <p class="small muted">Replace this with a real map image or embed later.</p>
+        </div>
+      </section>
+    </main>
+
+    <!-- footer injected -->
+  </div>
+
+  <script type="module" src="../js/header.js"></script>
+  <script type="module" src="../js/footer.js"></script>
+  <script type="module" src="../js/main.js"></script>
+</body>
+</html>
+
