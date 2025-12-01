@@ -4,15 +4,13 @@
 // App initialization, search wiring, gallery rendering, detail logic.
 // Uses searchImages and lookupDesigner from api.js
 
-import { injectHeader } from './header.js';
-import { injectFooter } from './footer.js';
+import './header.js'; // will auto-inject header
+import './footer.js'; // will auto-inject footer
 import { searchImages, lookupDesigner } from './api.js';
 import { setLastVisited, getLastVisited, formatISODate } from './utils.js';
 
 // Wait for DOM then wire
 document.addEventListener('DOMContentLoaded', async () => {
-  // header and footer are injected by header.js and footer.js automatically
-  // ensure footer year and header state are present
   try {
     setupLastModifiedAndVisited();
     wireSearchControls();
@@ -20,6 +18,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     wireContactForm();
     wireFavoritesPage();
     wireDetailPage();
+    wireRegionLinks(); // detect query string region on lookbook page
   } catch (err) {
     console.error('Initialization error', err);
   }
@@ -39,7 +38,7 @@ function buildCard(item){
   const article = document.createElement('article');
   article.className = 'card';
   article.innerHTML = `
-    <img data-src="${item.img}" alt="${item.title || 'Style'}" class="lazy" loading="lazy">
+    <img data-src="${item.img}" alt="${escapeHtml(item.title || 'Style')}" class="lazy" loading="lazy">
     <div class="card-body">
       <h3>${escapeHtml(item.title || 'Untitled')}</h3>
       <p class="muted small">${escapeHtml(item.description || '')}</p>
@@ -98,12 +97,14 @@ function renderGallery(items = [], containerId = 'gallery'){
 // Save a favorite to localStorage
 function saveFavorite(id, items){
   const stored = JSON.parse(localStorage.getItem('favorites') || '[]');
-  if (stored.find(s => s.id === id)) return;
+  if (stored.find(s => s.id === id)) {
+    alert('Already in favorites');
+    return;
+  }
   const item = items.find(i => i.id === id);
   if (!item) return;
   stored.push(item);
   localStorage.setItem('favorites', JSON.stringify(stored));
-  // simple user feedback
   alert('Saved to favorites');
 }
 
@@ -112,15 +113,13 @@ function viewDetail(id, items){
   const item = items.find(i => i.id === id);
   if (!item) return;
   sessionStorage.setItem('detailItem', JSON.stringify(item));
-  // navigate to pages/style-detail.html (works from root and pages)
-  // choose path depending on current location
+  // navigate: if current page is inside pages/ use style-detail.html, else pages/style-detail.html
   const base = location.pathname.includes('/pages/') ? 'style-detail.html' : 'pages/style-detail.html';
   location.href = base;
 }
 
 // Load initial gallery (index / lookbook)
 async function loadInitialGallery(){
-  const path = location.pathname;
   // determine where to render
   const galleryId = document.getElementById('gallery') ? 'gallery'
                   : document.getElementById('lookbookGallery') ? 'lookbookGallery'
@@ -132,23 +131,30 @@ async function loadInitialGallery(){
     return;
   }
 
+  // If lookbook page has a region query param, use it
+  const params = new URLSearchParams(location.search);
+  const regionQ = params.get('region');
+
+  const q = regionQ ? `${regionQ} Africa fashion` : 'african fashion';
+
   try {
-    const results = await searchImages('african fashion', 12);
+    const results = await searchImages(q, 12);
     const items = results.map((r, i) => ({
       id: r.id || `r${i}`,
       title: r.alt_description || `Style ${i+1}`,
       description: r.user?.name ? `Photo by ${r.user.name}` : '',
-      img: r.urls?.small || r.urls?.regular || '/images/hero-image.jpg',
+      img: r.urls?.small || r.urls?.regular || (location.pathname.includes('/pages/') ? '../images/hero-image.jpg' : './images/hero-image.jpg'),
       designer: ''
     }));
     renderGallery(items, galleryId);
   } catch (err) {
     console.warn('Image load failed, showing fallback', err);
+    const fallbackImg = location.pathname.includes('/pages/') ? '../images/hero-image.jpg' : './images/hero-image.jpg';
     renderGallery([{
       id: 'fallback1',
       title: 'Demo style',
       description: 'Demo content',
-      img: '/images/hero-image.jpg'
+      img: fallbackImg
     }], galleryId);
   }
 }
@@ -172,7 +178,7 @@ function wireSearchControls(){
         id: r.id || `s${i}`,
         title: r.alt_description || `${fabric || 'Style'}`,
         description: r.user?.name ? `Photo by ${r.user.name}` : '',
-        img: r.urls?.small || r.urls?.regular || '/images/hero-image.jpg',
+        img: r.urls?.small || r.urls?.regular || (location.pathname.includes('/pages/') ? '../images/hero-image.jpg' : './images/hero-image.jpg'),
         designer: designer || ''
       }));
       renderGallery(items, 'gallery');
@@ -207,7 +213,7 @@ function wireDetailPage(){
   const item = JSON.parse(raw);
   detailEl.innerHTML = `
     <h2>${escapeHtml(item.title)}</h2>
-    <img src="${item.img}" alt="${escapeHtml(item.title)}" style="width:100%;max-height:420px;object-fit:cover;border-radius:8px;margin:0.6rem 0">
+    <img src="${item.img}" alt="${escapeHtml(item.title)}" style="width:100%;max-height:520px;object-fit:cover;border-radius:8px;margin:0.6rem 0">
     <p class="muted">${escapeHtml(item.description || '')}</p>
     <p><strong>Designer:</strong> ${escapeHtml(item.designer || 'Unknown')}</p>
   `;
@@ -232,5 +238,10 @@ function wireContactForm(){
     form.reset();
     if (status) status.textContent = 'Message saved locally (demo). Thank you!';
   });
+}
+
+// If user clicked a region card (regions.html), keep region query so lookbook loads that region
+function wireRegionLinks(){
+  // nothing required: regions.html links already add ?region=North etc.
 }
 

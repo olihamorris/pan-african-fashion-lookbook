@@ -1,5 +1,3 @@
-
-
 // js/utils.js
 // small utilities used across the app
 
@@ -31,4 +29,5 @@ export async function safeFetch(url, opts = {}){
   if (!res.ok) throw new Error(`Network error: ${res.status}`);
   return res.json();
 }
+
 

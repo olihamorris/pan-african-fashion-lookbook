@@ -1,5 +1,3 @@
-
-
 // js/api.js
 // Encapsulate third-party API calls (Unsplash + Wikipedia)
 // Replace UNSPLASH_ACCESS_KEY with your key.
@@ -11,7 +9,7 @@ const UNSPLASH_ACCESS_KEY = 'UaBJNyaTcR69lISPYXJbKEoHll3qksLrd5CgfOsA5cU'; // <-
  * Returns array of objects with id, urls.small, alt_description, user.name
  */
 export async function searchImages(query = 'african fashion', perPage = 12){
-  if (!UNSPLASH_ACCESS_KEY){
+  if (!UNSPLASH_ACCESS_KEY || UNSPLASH_ACCESS_KEY === 'UNSPLASH_ACCESS_KEY'){
     // fallback to local demo data (small)
     return [
       { id: 'demo1', alt_description: 'African fabric', urls: { small: '/images/hero-image.jpg' }, user: { name: 'Local' } }
