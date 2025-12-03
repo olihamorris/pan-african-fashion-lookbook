@@ -1,35 +1,33 @@
+
+
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Regions - Pan-African Fashion Lookbook</title>
-  <meta name="description" content="Browse by region: North, West, East, South" />
-  <link rel="stylesheet" href="../css/style.css" />
-  <link rel="stylesheet" href="../css/responsive.css" />
+  <title>Regions</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/responsive.css">
 </head>
 <body>
-  <div id="root">
-    <!-- header injected -->
-    <main class="container page-content">
-      <section class="page-hero">
-        <h1>Regions</h1>
-        <p class="lead">Choose a region to explore styles.</p>
-      </section>
+  <header id="site-header"></header>
 
-      <section class="region-grid">
-        <a class="region-card" data-region="North" href="lookbook.html?region=North">North Africa</a>
-        <a class="region-card" data-region="West" href="lookbook.html?region=West">West Africa</a>
-        <a class="region-card" data-region="East" href="lookbook.html?region=East">East Africa</a>
-        <a class="region-card" data-region="South" href="lookbook.html?region=South">Southern Africa</a>
-      </section>
-    </main>
+  <main class="container page-main">
+    <h1>Regions</h1>
+    <p>Choose a region to explore styles and fabrics:</p>
+    <ul class="regions-list">
+      <li><a href="lookbook.html?region=north">North Africa</a></li>
+      <li><a href="lookbook.html?region=west">West Africa</a></li>
+      <li><a href="lookbook.html?region=east">East Africa</a></li>
+      <li><a href="lookbook.html?region=south">Southern Africa</a></li>
+    </ul>
+  </main>
 
-    <!-- footer injected -->
-  </div>
+  <footer id="site-footer"></footer>
 
   <script type="module" src="../js/header.js"></script>
   <script type="module" src="../js/footer.js"></script>
+  <script type="module" src="../js/utils.js"></script>
   <script type="module" src="../js/main.js"></script>
 </body>
 </html>

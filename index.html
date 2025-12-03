@@ -1,25 +1,28 @@
+
+
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Pan-African Fashion Lookbook</title>
-  <meta name="description" content="Pan-African Fashion Lookbook — designers, fabrics and styles across Africa" />
+  <meta name="description" content="Pan-African Fashion Lookbook — designers, fabrics and styles from Africa" />
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/responsive.css" />
 </head>
+
 <body>
   <div id="root">
-    <!-- header injected by js/header.js -->
-    <main id="main" class="container">
-      <section class="hero">
+    <header id="site-header"></header>
+
+    <main id="main" class="container page-main">
+      <section class="hero page-hero">
         <div class="hero-left">
           <h1 class="hero-title">Pan-African Fashion Lookbook</h1>
           <p class="hero-sub">Discover fabrics, designers and styles from North, West, East and Southern Africa.</p>
 
           <div class="filters" aria-label="Search filters">
-            <label for="region" class="sr-only">Region</label>
-            <select id="region" class="select">
+            <select id="region" class="select" aria-label="Region select">
               <option value="">All Regions</option>
               <option value="North">North Africa</option>
               <option value="West">West Africa</option>
@@ -27,34 +30,37 @@
               <option value="South">Southern Africa</option>
             </select>
 
-            <label for="fabric" class="sr-only">Fabric</label>
             <input id="fabric" class="input" type="search" placeholder="Search fabric (e.g., ankara, kente)" />
-
-            <label for="designer" class="sr-only">Designer</label>
             <input id="designer" class="input" type="search" placeholder="Search designer name" />
-
             <button id="searchBtn" class="btn">Search</button>
           </div>
 
           <div class="meta small">
-            <span>Last modified: <time id="lastModified"></time></span> &middot;
-            <span>Last visited: <span id="lastVisited"></span></span>
+            <span>Last modified: <time id="last-modified"></time></span> &middot;
+            <span>Last visited: <span id="last-visited"></span></span>
           </div>
         </div>
 
         <div class="hero-right">
-          <img src="images/hero-image.webp" alt="Bright African fashion" class="hero-img" loading="lazy">
+          <img src="images/hero-imag.webp" alt="Bright African fashion" class="hero-img" loading="lazy">
         </div>
       </section>
 
-      <section id="gallery" class="gallery" aria-live="polite">
-        <!-- cards injected by js/main.js -->
+      <section id="gallery" class="gallery gallery-grid" aria-live="polite">
+        <!-- Cards injected by js/main.js -->
       </section>
+
+      <div id="load-more-wrap" class="center">
+        <button id="load-more" class="btn">Load more</button>
+      </div>
     </main>
 
-    <!-- footer injected by js/footer.js -->
+    <footer id="site-footer"></footer>
   </div>
 
+  <script type="module" src="js/header.js"></script>
+  <script type="module" src="js/footer.js"></script>
+  <script type="module" src="js/utils.js"></script>
   <script type="module" src="js/main.js"></script>
 </body>
 </html>

@@ -1,37 +1,27 @@
+
+
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Favorites - Pan-African Fashion Lookbook</title>
-  <meta name="description" content="Your saved favorites" />
-  <link rel="stylesheet" href="../css/style.css" />
-  <link rel="stylesheet" href="../css/responsive.css" />
+  <title>Favorites</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/responsive.css">
 </head>
 <body>
-  <div id="root">
-    <!-- header injected -->
-    <main class="container page-content">
-      <section class="page-hero">
-        <h1>Favorites</h1>
-        <p class="lead">Your saved looks and designers.</p>
-      </section>
+  <header id="site-header"></header>
 
-      <section id="favoritesGallery" class="gallery">
-        <!-- favorites loaded by js/main.js -->
-      </section>
-    </main>
+  <main class="container page-main">
+    <h1>Your Favorites</h1>
+    <div id="favorites" class="gallery-grid"></div>
+  </main>
 
-    <!-- footer injected -->
-  </div>
+  <footer id="site-footer"></footer>
 
   <script type="module" src="../js/header.js"></script>
   <script type="module" src="../js/footer.js"></script>
+  <script type="module" src="../js/utils.js"></script>
   <script type="module" src="../js/main.js"></script>
 </body>
 </html>
-
-
-
-
-

@@ -1,33 +1,29 @@
 // js/utils.js
-// small utilities used across the app
-
-export const qs = (sel, root = document) => root.querySelector(sel);
-export const qsa = (sel, root = document) => Array.from(root.querySelectorAll(sel));
-
-export function setLastVisited(){
-  try {
-    localStorage.setItem('lastVisited', new Date().toISOString());
-  } catch(e) { /* ignore */ }
-}
-export function getLastVisited(){
-  try {
-    const v = localStorage.getItem('lastVisited');
-    return v ? new Date(v).toLocaleString() : 'First visit';
-  } catch(e){ return 'Unknown' }
+export function el(sel) {
+  if (!sel) return null;
+  return document.querySelector(sel);
 }
 
-export function formatISODate(d = document.lastModified){
-  if (!d) return new Date().toLocaleString();
-  const dt = new Date(d);
-  if (Number.isNaN(dt.getTime())) return d;
-  return dt.toLocaleString();
+export function createEl(tag, attrs = {}, ...children) {
+  const node = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === 'class') node.className = v;
+    else if (k === 'html') node.innerHTML = v;
+    else node.setAttribute(k, v);
+  }
+  for (const c of children) {
+    if (typeof c === 'string' || typeof c === 'number') node.appendChild(document.createTextNode(c));
+    else if (c instanceof Node) node.appendChild(c);
+  }
+  return node;
 }
 
-// simple helper to fetch JSON and handle errors
-export async function safeFetch(url, opts = {}){
-  const res = await fetch(url, opts);
-  if (!res.ok) throw new Error(`Network error: ${res.status}`);
-  return res.json();
+export function formatDateISO(val) {
+  // accepts number or string timestamp or Date
+  if (!val) return '';
+  const n = Number(val);
+  const d = Number.isFinite(n) ? new Date(n) : new Date(val);
+  if (Number.isNaN(d.getTime())) return String(val);
+  return d.toLocaleString();
 }
-
 

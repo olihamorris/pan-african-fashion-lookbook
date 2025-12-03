@@ -1,33 +1,46 @@
+
+
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Lookbook - Pan-African Fashion Lookbook</title>
-  <meta name="description" content="Curated lookbook — styles by region and fabric" />
-  <link rel="stylesheet" href="../css/style.css" />
-  <link rel="stylesheet" href="../css/responsive.css" />
+  <title>Lookbook — Pan-African Fashion</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/responsive.css">
 </head>
 <body>
-  <div id="root">
-    <!-- header injected -->
-    <main class="container page-content">
-      <section class="page-hero">
-        <h1>Lookbook</h1>
-        <p class="lead">Curated looks from across the continent.</p>
-      </section>
+  <header id="site-header"></header>
 
-      <section id="lookbookGallery" class="gallery">
-        <!-- cards injected by js/main.js -->
-      </section>
-    </main>
+  <main class="container page-main">
+    <section class="page-hero">
+      <h1>Lookbook</h1>
+      <p class="tagline">Browse curated images by region, designer or fabric.</p>
 
-    <!-- footer injected -->
-  </div>
+      <div class="filters">
+        <input id="search-input" type="search" placeholder="Search by fabric, designer or keyword">
+        <select id="region-select">
+          <option value="all">All Regions</option>
+          <option value="north">North Africa</option>
+          <option value="west">West Africa</option>
+          <option value="east">East Africa</option>
+          <option value="south">Southern Africa</option>
+        </select>
+        <button id="search-btn" class="btn">Search</button>
+      </div>
+    </section>
+
+    <section class="gallery-section">
+      <div id="gallery" class="gallery-grid gallery" aria-live="polite"></div>
+      <div id="load-more-wrap" class="center"><button id="load-more" class="btn">Load more</button></div>
+    </section>
+  </main>
+
+  <footer id="site-footer"></footer>
 
   <script type="module" src="../js/header.js"></script>
   <script type="module" src="../js/footer.js"></script>
+  <script type="module" src="../js/utils.js"></script>
   <script type="module" src="../js/main.js"></script>
 </body>
 </html>
-

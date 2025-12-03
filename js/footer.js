@@ -1,40 +1,28 @@
-
-
 // js/footer.js
-// Inject site footer into pages with proper base path
+export function renderFooter() {
+  const footerHost = document.getElementById('site-footer');
+  if (!footerHost) return;
 
-function getBase(){
-  return location.pathname.includes('/pages/') ? '../' : './';
-}
+  const lastModified = document.lastModified;
+  
+  let lastVisit = localStorage.getItem("lastVisit");
+  const now = new Date();
+  localStorage.setItem("lastVisit", now.toString());
 
-export function injectFooter(){
-  const base = getBase();
-  const footerHTML = `
-    <footer class="site-footer" role="contentinfo">
-      <div class="container footer-inner">
-        <div class="socials" aria-label="Social links">
-          <a href="#" aria-label="Facebook placeholder">Facebook</a>
-          <a href="#" aria-label="Instagram placeholder">Instagram</a>
-          <a href="#" aria-label="Twitter placeholder">Twitter</a>
-          <a href="#" aria-label="LinkedIn placeholder">LinkedIn</a>
-        </div>
-        <div class="meta small muted">
-          <span>© <span id="siteYear"></span> Pan-African Fashion Lookbook</span>
-        </div>
+  footerHost.innerHTML = `
+    <div class="foot-inner container">
+      <p>&copy; <span id="year">${new Date().getFullYear()}</span> Pan-African Fashion Lookbook</p>
+
+      <p>Last Modified: ${lastModified}</p>
+      <p>Last Visited: ${lastVisit ? new Date(lastVisit).toLocaleString() : "First visit"}</p>
+
+      <p class="muted">Made with ❤️ • <a href="#">Terms</a> • <a href="#">Privacy</a></p>
+
+      <div class="socials">
+        <a href="#" aria-label="Facebook">Facebook</a>
+        <a href="#" aria-label="Twitter">Twitter</a>
+        <a href="#" aria-label="Instagram">Instagram</a>
       </div>
-    </footer>
+    </div>
   `;
-  const root = document.getElementById('root');
-  if (!root) return;
-  root.insertAdjacentHTML('beforeend', footerHTML);
-  const yearEl = document.getElementById('siteYear');
-  if (yearEl) yearEl.textContent = new Date().getFullYear();
 }
-
-if (typeof window !== 'undefined') {
-  document.addEventListener('DOMContentLoaded', () => {
-    injectFooter();
-  });
-}
-
-

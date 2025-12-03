@@ -1,247 +1,282 @@
 
-
 // js/main.js
-// App initialization, search wiring, gallery rendering, detail logic.
-// Uses searchImages and lookupDesigner from api.js
+import { renderFooter } from './footer.js';
+import { el, createEl, formatDateISO } from './utils.js';
+import { searchUnsplash, fetchWikipediaSummary } from './api.js';
 
-import './header.js'; // will auto-inject header
-import './footer.js'; // will auto-inject footer
-import { searchImages, lookupDesigner } from './api.js';
-import { setLastVisited, getLastVisited, formatISODate } from './utils.js';
+// If you already have header.js that injects header, ensure it's loaded before this script on pages that need it.
 
-// Wait for DOM then wire
-document.addEventListener('DOMContentLoaded', async () => {
-  try {
-    setupLastModifiedAndVisited();
-    wireSearchControls();
-    await loadInitialGallery();
-    wireContactForm();
-    wireFavoritesPage();
-    wireDetailPage();
-    wireRegionLinks(); // detect query string region on lookbook page
-  } catch (err) {
-    console.error('Initialization error', err);
+document.addEventListener('DOMContentLoaded', () => {
+  // Render footer (safe to call even if footer already exists)
+  renderFooter();
+
+  const gallery = el('#gallery');
+  const searchInput = el('#search-input');
+  const regionSelect = el('#region-select');
+  const searchBtn = el('#search-btn');
+  const loadMoreBtn = el('#load-more');
+  const lastModifiedEl = el('#last-modified');
+  const lastVisitedEl = el('#last-visited');
+  const themeToggle = el('#theme-toggle');
+
+  // Theme handling
+  const setTheme = (theme) => {
+    if (theme === 'dark') {
+      document.body.classList.add('dark');
+    } else {
+      document.body.classList.remove('dark');
+    }
+    localStorage.setItem('pan-lookbook-theme', theme);
+    if (themeToggle) {
+      themeToggle.textContent = theme === 'dark' ? 'Light mode' : 'Dark mode';
+      themeToggle.setAttribute('aria-pressed', theme === 'dark');
+    }
+  };
+
+  const savedTheme = localStorage.getItem('pan-lookbook-theme') || 'light';
+  setTheme(savedTheme);
+
+  if (themeToggle) {
+    themeToggle.addEventListener('click', () => {
+      const next = document.body.classList.contains('dark') ? 'light' : 'dark';
+      setTheme(next);
+    });
+  }
+
+  // Last modified & last visited
+  if (lastModifiedEl) lastModifiedEl.textContent = document.lastModified || '—';
+  if (lastVisitedEl) {
+    const last = localStorage.getItem('pan-lookbook-lastvisited');
+    lastVisitedEl.textContent = last ? formatDateISO(last) : 'First visit';
+    localStorage.setItem('pan-lookbook-lastvisited', Date.now());
+  }
+
+  // Lazy-load observer
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      const img = entry.target;
+      const src = img.dataset.src || img.getAttribute('data-src');
+      if (src) {
+        img.src = src;
+        img.removeAttribute('data-src');
+      }
+      io.unobserve(img);
+    });
+  }, { rootMargin: '200px' });
+
+  // State
+  let page = 1;
+  let lastQuery = 'African fabric';
+
+  function buildCard(photo) {
+    const card = createEl('article', { class: 'card' });
+    const img = createEl('img', {
+      alt: photo.alt_description || photo.description || 'Fashion image',
+      loading: 'lazy',
+    });
+    // use data-src for lazy load
+    img.setAttribute('data-src', photo.urls.regular);
+    img.addEventListener('error', () => { img.style.display = 'none'; });
+    io.observe(img);
+
+    const meta = createEl('div', { class: 'meta' },
+      createEl('h3', {}, photo.description || photo.alt_description || 'Untitled'),
+      createEl('p', {}, photo.user?.name || 'Unknown')
+    );
+
+    const actions = createEl('div', { class: 'actions' });
+    const favBtn = createEl('button', {}, '❤ Favorite');
+    favBtn.addEventListener('click', () => toggleFavorite(photo));
+    const detailsBtn = createEl('button', {}, 'Details');
+    detailsBtn.addEventListener('click', () => openDetail(photo));
+    actions.appendChild(favBtn);
+    actions.appendChild(detailsBtn);
+
+    card.appendChild(img);
+    card.appendChild(meta);
+    card.appendChild(actions);
+    return card;
+  }
+
+  function showError(message) {
+    if (!gallery) return;
+    gallery.innerHTML = `<p class="error">${message}</p>`;
+  }
+
+  async function loadImages({ query = 'African fabric', append = false } = {}) {
+    if (!gallery) return;
+    if (!append) {
+      gallery.innerHTML = '';
+      page = 1;
+    }
+    lastQuery = query;
+    try {
+      const res = await searchUnsplash(query, page, 12);
+      const items = res?.results || [];
+      if (!append && items.length === 0) {
+        gallery.innerHTML = '<p>No results found — try another search.</p>';
+        return;
+      }
+      items.forEach((it) => {
+        const card = buildCard(it);
+        gallery.appendChild(card);
+      });
+      page += 1;
+    } catch (err) {
+      console.error(err);
+      showError('Error loading images. Check console and ensure your Unsplash key is set in js/api.js.');
+    }
+  }
+
+  // Favorites stored in localStorage
+  function getFavs() {
+    return JSON.parse(localStorage.getItem('pan-lookbook-favs') || '[]');
+  }
+
+  function toggleFavorite(photo) {
+    const favs = getFavs();
+    const exists = favs.find((f) => f.id === photo.id);
+    if (exists) {
+      const newFavs = favs.filter((f) => f.id !== photo.id);
+      localStorage.setItem('pan-lookbook-favs', JSON.stringify(newFavs));
+      alert('Removed from favorites');
+    } else {
+      favs.push({
+        id: photo.id,
+        urls: photo.urls,
+        desc: photo.description || photo.alt_description,
+        user: photo.user,
+      });
+      localStorage.setItem('pan-lookbook-favs', JSON.stringify(favs));
+      alert('Added to favorites');
+    }
+  }
+
+  // Open detail (store in sessionStorage and navigate)
+  function openDetail(photo) {
+    sessionStorage.setItem('pan-lookbook-detail', JSON.stringify(photo));
+    window.location.href = '/pages/style-detail.html';
+  }
+
+  // Event handlers
+  if (searchBtn) {
+    searchBtn.addEventListener('click', () => {
+      const q = (searchInput && searchInput.value.trim()) || '';
+      const region = regionSelect && regionSelect.value;
+      const query = q || (region && region !== 'all' ? `${region} African fabric` : 'African fabric');
+      loadImages({ query });
+    });
+  }
+
+  if (loadMoreBtn) {
+    loadMoreBtn.addEventListener('click', () => {
+      loadImages({ query: lastQuery, append: true });
+    });
+  }
+
+  // Initialize pages behavior
+  const path = location.pathname;
+
+  // index or lookbook page auto-load
+  if (path.endsWith('/') || path.endsWith('/index.html') || path.endsWith('/pages/lookbook.html')) {
+    // check query param region
+    const params = new URLSearchParams(location.search);
+    const region = params.get('region');
+    const q = region ? `${region} African fabric` : 'African fabric';
+    loadImages({ query: q });
+  }
+
+  // style-detail page: render saved detail
+  if (path.endsWith('/pages/style-detail.html')) {
+    const wrap = el('#style-detail');
+    const raw = sessionStorage.getItem('pan-lookbook-detail');
+    if (!wrap) return;
+    if (!raw) {
+      wrap.innerHTML = '<p>No detail loaded.</p>';
+      return;
+    }
+    try {
+      const item = JSON.parse(raw);
+      (async () => {
+        const wiki = await fetchWikipediaSummary(item.user?.name || item.description || 'African textile');
+        wrap.innerHTML = `
+          <h2>${item.description || item.alt_description || 'Style'}</h2>
+          <img src="${item.urls.regular}" alt="${item.alt_description || ''}" style="max-width:100%;border-radius:8px;">
+          <p><strong>Photographer / source:</strong> ${item.user?.name || 'Unknown'}</p>
+          <h3>About</h3>
+          <p>${(wiki && wiki.extract) ? wiki.extract : 'No additional info available.'}</p>
+        `;
+      })();
+    } catch (err) {
+      wrap.innerHTML = '<p>Unable to render detail.</p>';
+    }
+  }
+
+  // designers page: render a small list with wiki extracts
+  if (path.endsWith('/pages/designers.html')) {
+    const wrap = el('#designers-list');
+    if (!wrap) return;
+    (async () => {
+      const designers = ['Lisa Folawiyo', 'Maki Oh', 'Maxhosa by Laduma', 'Tiffany Amber', 'Deola Sagoe'];
+      for (const name of designers) {
+        const card = createEl('div', { class: 'card' });
+        card.appendChild(createEl('h3', {}, name));
+        const wiki = await fetchWikipediaSummary(name);
+        card.appendChild(createEl('p', {}, wiki?.extract ? (wiki.extract.substring(0, 220) + '...') : 'No wiki info available.'));
+        wrap.appendChild(card);
+      }
+    })();
+  }
+
+  // favorites page: render saved favourites
+  if (path.endsWith('/pages/favorites.html')) {
+    const wrap = el('#favorites');
+    if (!wrap) return;
+    const favs = getFavs();
+    if (!favs.length) {
+      wrap.innerHTML = '<p>No favorites yet.</p>';
+    } else {
+      favs.forEach((i) => {
+        const c = createEl('article', { class: 'card' });
+        const img = createEl('img', { src: i.urls.small, alt: i.desc || 'fav' });
+        c.appendChild(img);
+        const meta = createEl('div', { class: 'meta' },
+          createEl('h3', {}, i.desc || 'Untitled'),
+          createEl('p', {}, i.user?.name || 'Unknown')
+        );
+        c.appendChild(meta);
+        wrap.appendChild(c);
+      });
+    }
+  }
+
+  // contact form handler (client-only)
+  const contactForm = el('#contact-form');
+  if (contactForm) {
+    contactForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      alert('Thanks! Message captured locally (this project uses no backend).');
+      contactForm.reset();
+    });
   }
 });
 
-// Show last modified & last visited where present
-function setupLastModifiedAndVisited(){
-  const lastModifiedEl = document.getElementById('lastModified');
-  const lastVisitedEl = document.getElementById('lastVisited');
-  if (lastModifiedEl) lastModifiedEl.textContent = formatISODate(document.lastModified);
-  if (lastVisitedEl) lastVisitedEl.textContent = getLastVisited();
-  setLastVisited();
+// Theme
+const themeToggle = document.getElementById("theme-toggle");
+
+function applyTheme(theme) {
+  document.body.classList.toggle("dark", theme === "dark");
+  themeToggle.textContent = theme === "dark" ? "Light mode" : "Dark mode";
+  localStorage.setItem("theme", theme);
 }
 
-// Build a gallery card element
-function buildCard(item){
-  const article = document.createElement('article');
-  article.className = 'card';
-  article.innerHTML = `
-    <img data-src="${item.img}" alt="${escapeHtml(item.title || 'Style')}" class="lazy" loading="lazy">
-    <div class="card-body">
-      <h3>${escapeHtml(item.title || 'Untitled')}</h3>
-      <p class="muted small">${escapeHtml(item.description || '')}</p>
-      <div class="actions">
-        <button class="icon-btn view-btn" data-id="${item.id}">View</button>
-        <button class="icon-btn fav-btn" data-id="${item.id}">♥ Save</button>
-      </div>
-    </div>
-  `;
-  return article;
-}
+// Load saved theme
+applyTheme(localStorage.getItem("theme") || "light");
 
-// Simple escape to avoid injection in injected strings
-function escapeHtml(str = '') {
-  return String(str).replace(/[&<>"']/g, (m) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-}
-
-// Lazy load images using IntersectionObserver
-function lazyLoadInit(){
-  const els = document.querySelectorAll('img.lazy[data-src]');
-  if (!('IntersectionObserver' in window)) {
-    // fallback: load all
-    els.forEach(img => { img.src = img.dataset.src; });
-    return;
-  }
-  const io = new IntersectionObserver((entries, observer) => {
-    entries.forEach(ent => {
-      if (ent.isIntersecting) {
-        const img = ent.target;
-        img.src = img.dataset.src;
-        img.removeAttribute('data-src');
-        img.classList.remove('lazy');
-        observer.unobserve(img);
-      }
-    });
-  }, { rootMargin: '120px' });
-  els.forEach(img => io.observe(img));
-}
-
-// Render a list of items to a gallery container (id 'gallery' or page-specific)
-function renderGallery(items = [], containerId = 'gallery'){
-  const container = document.getElementById(containerId);
-  if (!container) return;
-  container.innerHTML = '';
-  items.forEach(item => container.appendChild(buildCard(item)));
-  lazyLoadInit();
-  // wire actions
-  container.querySelectorAll('.fav-btn').forEach(btn => {
-    btn.addEventListener('click', () => saveFavorite(btn.dataset.id, items));
-  });
-  container.querySelectorAll('.view-btn').forEach(btn => {
-    btn.addEventListener('click', () => viewDetail(btn.dataset.id, items));
-  });
-}
-
-// Save a favorite to localStorage
-function saveFavorite(id, items){
-  const stored = JSON.parse(localStorage.getItem('favorites') || '[]');
-  if (stored.find(s => s.id === id)) {
-    alert('Already in favorites');
-    return;
-  }
-  const item = items.find(i => i.id === id);
-  if (!item) return;
-  stored.push(item);
-  localStorage.setItem('favorites', JSON.stringify(stored));
-  alert('Saved to favorites');
-}
-
-// View detail: store in sessionStorage and navigate to detail page
-function viewDetail(id, items){
-  const item = items.find(i => i.id === id);
-  if (!item) return;
-  sessionStorage.setItem('detailItem', JSON.stringify(item));
-  // navigate: if current page is inside pages/ use style-detail.html, else pages/style-detail.html
-  const base = location.pathname.includes('/pages/') ? 'style-detail.html' : 'pages/style-detail.html';
-  location.href = base;
-}
-
-// Load initial gallery (index / lookbook)
-async function loadInitialGallery(){
-  // determine where to render
-  const galleryId = document.getElementById('gallery') ? 'gallery'
-                  : document.getElementById('lookbookGallery') ? 'lookbookGallery'
-                  : document.getElementById('favoritesGallery') ? 'favoritesGallery'
-                  : null;
-
-  if (!galleryId) {
-    // maybe this is detail or other page — still bind favorites or detail
-    return;
-  }
-
-  // If lookbook page has a region query param, use it
-  const params = new URLSearchParams(location.search);
-  const regionQ = params.get('region');
-
-  const q = regionQ ? `${regionQ} Africa fashion` : 'african fashion';
-
-  try {
-    const results = await searchImages(q, 12);
-    const items = results.map((r, i) => ({
-      id: r.id || `r${i}`,
-      title: r.alt_description || `Style ${i+1}`,
-      description: r.user?.name ? `Photo by ${r.user.name}` : '',
-      img: r.urls?.small || r.urls?.regular || (location.pathname.includes('/pages/') ? '../images/hero-image.jpg' : './images/hero-image.jpg'),
-      designer: ''
-    }));
-    renderGallery(items, galleryId);
-  } catch (err) {
-    console.warn('Image load failed, showing fallback', err);
-    const fallbackImg = location.pathname.includes('/pages/') ? '../images/hero-image.jpg' : './images/hero-image.jpg';
-    renderGallery([{
-      id: 'fallback1',
-      title: 'Demo style',
-      description: 'Demo content',
-      img: fallbackImg
-    }], galleryId);
-  }
-}
-
-// Wire search controls on index page
-function wireSearchControls(){
-  const searchBtn = document.getElementById('searchBtn');
-  if (!searchBtn) return;
-  searchBtn.addEventListener('click', async () => {
-    const region = document.getElementById('region').value.trim();
-    const fabric = document.getElementById('fabric').value.trim();
-    const designer = document.getElementById('designer').value.trim();
-    const qParts = [];
-    if (region) qParts.push(region + ' Africa fashion');
-    if (fabric) qParts.push(fabric);
-    if (designer) qParts.push(designer);
-    const q = qParts.length ? qParts.join(' ') : 'african fashion';
-    try {
-      const data = await searchImages(q, 12);
-      const items = data.map((r, i) => ({
-        id: r.id || `s${i}`,
-        title: r.alt_description || `${fabric || 'Style'}`,
-        description: r.user?.name ? `Photo by ${r.user.name}` : '',
-        img: r.urls?.small || r.urls?.regular || (location.pathname.includes('/pages/') ? '../images/hero-image.jpg' : './images/hero-image.jpg'),
-        designer: designer || ''
-      }));
-      renderGallery(items, 'gallery');
-    } catch (err) {
-      console.error(err);
-      alert('Search failed, try again.');
-    }
-  });
-}
-
-// Favorites page wiring
-function wireFavoritesPage(){
-  const favContainer = document.getElementById('favoritesGallery');
-  if (!favContainer) return;
-  const stored = JSON.parse(localStorage.getItem('favorites') || '[]');
-  if (stored.length === 0){
-    favContainer.innerHTML = '<p class="muted">No favorites yet. Save a look from the lookbook.</p>';
-    return;
-  }
-  renderGallery(stored, 'favoritesGallery');
-}
-
-// Detail page logic
-function wireDetailPage(){
-  const detailEl = document.getElementById('detailArticle');
-  if (!detailEl) return;
-  const raw = sessionStorage.getItem('detailItem');
-  if (!raw) {
-    detailEl.innerHTML = '<p>No item selected. Go to <a href="../index.html">home</a>.</p>';
-    return;
-  }
-  const item = JSON.parse(raw);
-  detailEl.innerHTML = `
-    <h2>${escapeHtml(item.title)}</h2>
-    <img src="${item.img}" alt="${escapeHtml(item.title)}" style="width:100%;max-height:520px;object-fit:cover;border-radius:8px;margin:0.6rem 0">
-    <p class="muted">${escapeHtml(item.description || '')}</p>
-    <p><strong>Designer:</strong> ${escapeHtml(item.designer || 'Unknown')}</p>
-  `;
-}
-
-// Contact form handling (fake submit: store in localStorage for demo)
-function wireContactForm(){
-  const form = document.getElementById('contactForm');
-  if (!form) return;
-  const status = document.getElementById('contactStatus');
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const data = {
-      name: form.name.value.trim(),
-      email: form.email.value.trim(),
-      message: form.message.value.trim(),
-      date: new Date().toISOString()
-    };
-    const stored = JSON.parse(localStorage.getItem('messages') || '[]');
-    stored.push(data);
-    localStorage.setItem('messages', JSON.stringify(stored));
-    form.reset();
-    if (status) status.textContent = 'Message saved locally (demo). Thank you!';
-  });
-}
-
-// If user clicked a region card (regions.html), keep region query so lookbook loads that region
-function wireRegionLinks(){
-  // nothing required: regions.html links already add ?region=North etc.
-}
+// Toggle on click
+themeToggle.addEventListener("click", () => {
+  const next = document.body.classList.contains("dark") ? "light" : "dark";
+  applyTheme(next);
+});
 

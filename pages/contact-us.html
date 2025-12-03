@@ -1,61 +1,66 @@
+
+
+
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Contact Us - Pan-African Fashion Lookbook</title>
-  <meta name="description" content="Contact Pan-African Fashion Lookbook — say hello or send a designer link" />
-  <link rel="stylesheet" href="../css/style.css" />
-  <link rel="stylesheet" href="../css/responsive.css" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Contact Us</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/responsive.css">
+    <style>
+        .contact-form {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            width: 80%;
+            margin: 40px auto;
+        }
+        .contact-form label {
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+        .contact-form input, .contact-form textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .contact-form button[type="submit"] {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            align-self: center;
+        }
+        .contact-form button[type="submit"]:hover {
+            background-color: #3e8e41;
+        }
+    </style>
 </head>
 <body>
-  <div id="root">
-    <!-- header injected -->
-    <main class="container page-content">
-      <section class="page-hero">
+    <header id="site-header"></header>
+    <main class="container page-main contact-page">
         <h1>Contact Us</h1>
-        <p class="lead">We love to hear from designers, stylists and friends.</p>
-      </section>
-
-      <section class="content contact-grid">
-        <div class="contact-card">
-          <h2>Say hello</h2>
-          <p>If you have a question or want to share a designer, write to us.</p>
-          <p><strong>Email:</strong> info@panafricanfashion.com</p>
-          <p><strong>Location:</strong> Pan-Africa (remote)</p>
-        </div>
-
-        <div class="contact-card">
-          <h2>Send a message</h2>
-          <form id="contactForm" class="contact-form" aria-label="Contact form">
+        <form id="contact-form" class="contact-form" action="#" novalidate>
             <label for="name">Name</label>
             <input id="name" name="name" required>
-
             <label for="email">Email</label>
             <input id="email" name="email" type="email" required>
-
             <label for="message">Message</label>
             <textarea id="message" name="message" rows="5" required></textarea>
-
-            <button type="submit" class="btn">Send Message</button>
-            <p id="contactStatus" class="small muted" aria-live="polite"></p>
-          </form>
-        </div>
-
-        <div class="map-card" aria-hidden="false">
-          <h2>Map of Africa</h2>
-          <img src="../images/africa-map.webp" alt="Stylized map placeholder" class="map-img" loading="lazy">
-          <p class="small muted">Poliical map of Africa.</p>
-        </div>
-      </section>
+            <button type="submit" class="btn">Send</button>
+        </form>
     </main>
-
-    <!-- footer injected -->
-  </div>
-
-  <script type="module" src="../js/header.js"></script>
-  <script type="module" src="../js/footer.js"></script>
-  <script type="module" src="../js/main.js"></script>
+    <footer id="site-footer"></footer>
+    <script type="module" src="../js/header.js"></script>
+    <script type="module" src="../js/footer.js"></script>
+    <script type="module" src="../js/utils.js"></script>
+    <script type="module" src="../js/main.js"></script>
 </body>
 </html>
-

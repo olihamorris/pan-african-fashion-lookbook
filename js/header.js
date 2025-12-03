@@ -1,111 +1,59 @@
-// js/header.js
-// Injects header HTML into every page, and wires the hamburger + theme toggle.
-// Uses basePath so images and links remain valid from pages/
 
-function getBasePath(){
-  // If page is inside /pages/ use '../' else use './'
-  return location.pathname.includes('/pages/') ? '../' : './';
+
+function getBase() {
+  return location.pathname.includes("/pages/") ? "../" : "./";
 }
 
-export function injectHeader(){
-  const base = getBasePath();
-  const headerHTML = `
-    <header class="site-header" role="banner">
-      <div class="container header-inner">
-        <a class="brand" href="${base}index.html">
-          <img src="${base}images/logo.png" alt="Logo">
-          <span class="name">Pan-African Lookbook</span>
-        </a>
+function buildHeaderHTML(base) {
+  return `
+    <div class="navbar container">
 
-        <nav class="nav" id="mainNav" role="navigation" aria-label="Main navigation">
-          <a href="${base}index.html">Home</a>
-          <a href="${base}pages/lookbook.html">Lookbook</a>
-          <a href="${base}pages/designers.html">Designers</a>
-          <a href="${base}pages/regions.html">Regions</a>
-          <a href="${base}pages/favorites.html">Favorites</a>
-          <div class="dropdown" style="display:inline-block;position:relative">
-            <button id="moreBtn" class="btn" aria-expanded="false">More ▾</button>
-            <div class="dropdown-menu" style="display:none;position:absolute;right:0;top:110%;background:var(--panel);padding:.6rem;border-radius:8px;box-shadow:var(--shadow);">
-              <a href="${base}pages/about-us.html">About Us</a>
-              <a href="${base}pages/contact-us.html">Contact Us</a>
-            </div>
-          </div>
-        </nav>
+      <a class="logo" href="${base}index.html">
+        <img src="${base}images/logo.png" class="logo-img" alt="Logo">
+      </a>
 
-        <div class="controls">
-          <button id="themeToggle" class="btn" aria-pressed="false">Dark</button>
-          <button id="hamburger" class="hamburger" aria-expanded="false" aria-controls="mainNav" aria-label="Open menu">
-            <span class="bar"></span><span class="bar"></span><span class="bar"></span>
-          </button>
-        </div>
-      </div>
-    </header>
+      <button id="hamburgerBtn" class="hamburger" aria-expanded="false">☰</button>
+
+      <ul id="navLinks" class="nav-links">
+        <li><a href="${base}index.html">Home</a></li>
+
+        <li><a href="${base}pages/region.html">Regions</a></li>
+
+        <li class="dropdown">
+          <a href="${base}pages/lookbook.html">Lookbook ▾</a>
+          <ul class="dropdown-menu">
+            <li><a href="${base}pages/about-us.html">About</a></li>
+            <li><a href="${base}pages/contact-us.html">Contact</a></li>
+            <li><a href="${base}pages/style-detail.html">Style Detail</a></li>
+          </ul>
+        </li>
+
+        <li><a href="${base}pages/designers.html">Designers</a></li>
+        <li><a href="${base}pages/favorites.html">Favorites</a></li>
+      </ul>
+
+      <button id="theme-toggle" class="btn">Dark mode</button>
+
+    </div>
   `;
-  const root = document.getElementById('root');
-  if (!root) return;
-  root.insertAdjacentHTML('afterbegin', headerHTML);
-  bindHeader();
 }
 
-function bindHeader(){
-  const hamburger = document.getElementById('hamburger');
-  const nav = document.getElementById('mainNav');
-  const themeToggle = document.getElementById('themeToggle');
-  const moreBtn = document.getElementById('moreBtn');
-  const dropdownMenu = moreBtn ? moreBtn.nextElementSibling : null;
+function bindHeaderHandlers() {
+  const hamburger = document.getElementById("hamburgerBtn");
+  const navLinks = document.getElementById("navLinks");
 
-  // hamburger toggles nav open class for small screens
-  hamburger?.addEventListener('click', () => {
-    const expanded = hamburger.getAttribute('aria-expanded') === 'true';
-    hamburger.setAttribute('aria-expanded', String(!expanded));
-    nav.classList.toggle('open');
-  });
-
-  // theme toggle persists choice to localStorage
-  themeToggle?.addEventListener('click', () => {
-    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-    if (isDark){
-      document.documentElement.removeAttribute('data-theme');
-      themeToggle.textContent = 'Dark';
-      themeToggle.setAttribute('aria-pressed', 'false');
-      localStorage.setItem('theme', 'light');
-    } else {
-      document.documentElement.setAttribute('data-theme', 'dark');
-      themeToggle.textContent = 'Light';
-      themeToggle.setAttribute('aria-pressed', 'true');
-      localStorage.setItem('theme', 'dark');
-    }
-  });
-
-  // dropdown toggle
-  if (moreBtn && dropdownMenu){
-    moreBtn.addEventListener('click', () => {
-      const expanded = moreBtn.getAttribute('aria-expanded') === 'true';
-      moreBtn.setAttribute('aria-expanded', String(!expanded));
-      dropdownMenu.style.display = expanded ? 'none' : 'block';
-    });
-    // hide when click outside
-    document.addEventListener('click', (e) => {
-      if (!moreBtn.contains(e.target) && !dropdownMenu.contains(e.target)){
-        dropdownMenu.style.display = 'none';
-        moreBtn.setAttribute('aria-expanded', 'false');
-      }
+  if (hamburger) {
+    hamburger.addEventListener("click", () => {
+      const open = navLinks.classList.toggle("open");
+      hamburger.setAttribute("aria-expanded", open ? "true" : "false");
     });
   }
-
-  // restore theme
-  const saved = localStorage.getItem('theme');
-  if (saved === 'dark') {
-    document.documentElement.setAttribute('data-theme', 'dark');
-    if (themeToggle) { themeToggle.textContent = 'Light'; themeToggle.setAttribute('aria-pressed', 'true'); }
-  }
 }
 
-// auto-inject header when script is loaded
-if (typeof window !== 'undefined') {
-  document.addEventListener('DOMContentLoaded', () => {
-    injectHeader();
-  });
-}
-
-
+document.addEventListener("DOMContentLoaded", () => {
+  const host = document.getElementById("site-header");
+  if (!host) return;
+  const base = getBase();
+  host.innerHTML = buildHeaderHTML(base);
+  bindHeaderHandlers();
+});

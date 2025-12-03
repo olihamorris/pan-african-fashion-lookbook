@@ -1,71 +1,28 @@
+
+
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Designers - Pan-African Fashion Lookbook</title>
-  <meta name="description" content="Search designers and read short bios sourced from Wikipedia" />
-  <link rel="stylesheet" href="../css/style.css" />
-  <link rel="stylesheet" href="../css/responsive.css" />
+  <title>Designers</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/responsive.css">
 </head>
 <body>
-  <div id="root">
-    <!-- header injected -->
-    <main class="container page-content">
-      <section class="page-hero">
-        <h1>Designers</h1>
-        <p class="lead">Look for designers and read a short summary.</p>
-      </section>
+  <header id="site-header"></header>
 
-      <section class="content">
-        <div class="designer-search">
-          <input id="designerQuery" placeholder="Type a designer name (example: Ozwald Boateng)" />
-          <button id="designerSearchBtn" class="btn">Lookup</button>
-        </div>
+  <main class="container page-main">
+    <h1>Designers</h1>
+    <div id="designers-list" class="designers-grid"></div>
+  </main>
 
-        <div id="designerResult" class="designer-result" aria-live="polite">
-          <!-- results from js/api.js + js/main.js -->
-        </div>
-      </section>
-    </main>
-
-    <!-- footer injected -->
-  </div>
+  <footer id="site-footer"></footer>
 
   <script type="module" src="../js/header.js"></script>
   <script type="module" src="../js/footer.js"></script>
+  <script type="module" src="../js/utils.js"></script>
   <script type="module" src="../js/main.js"></script>
-  <script type="module">
-    import { lookupDesigner } from '../js/api.js';
-    const btn = document.getElementById('designerSearchBtn');
-    const input = document.getElementById('designerQuery');
-    const out = document.getElementById('designerResult');
-
-    btn.addEventListener('click', async () => {
-      const q = input.value.trim();
-      if (!q) return;
-      out.innerHTML = '<p>Loading...</p>';
-      try {
-        const summary = await lookupDesigner(q);
-        if (!summary) {
-          out.innerHTML = '<p>No summary found.</p>';
-          return;
-        }
-        const html = `
-          <article class="designer-card">
-            <h2>${summary.title}</h2>
-            <p class="muted small">Source: Wikipedia</p>
-            <div class="designer-extract">${summary.extract_html || summary.extract || ''}</div>
-            <p><a href="${summary.content_urls?.desktop?.page || '#'}" target="_blank" rel="noopener">Read full page on Wikipedia</a></p>
-          </article>
-        `;
-        out.innerHTML = html;
-      } catch (err) {
-        out.innerHTML = '<p>There was an error. Try again later.</p>';
-        console.error(err);
-      }
-    });
-  </script>
 </body>
 </html>
 
