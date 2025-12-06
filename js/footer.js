@@ -16,7 +16,7 @@ export function renderFooter() {
       <p>Last Modified: ${lastModified}</p>
       <p>Last Visited: ${lastVisit ? new Date(lastVisit).toLocaleString() : "First visit"}</p>
 
-      <p class="muted">Made with ❤️ • <a href="#">Terms</a> • <a href="#">Privacy</a></p>
+      <p class="muted">Built By Oliha Morris [BYU-Idaho, USA] • <a href="#">Terms</a> • <a href="#">Privacy</a></p>
 
       <div class="socials">
         <a href="#" aria-label="Facebook">Facebook</a>

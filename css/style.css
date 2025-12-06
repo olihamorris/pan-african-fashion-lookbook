@@ -336,3 +336,66 @@ body.dark .card {
   object-fit: cover !important;
   display: block;
 }
+
+/* NAV BORDER WRAPPER */
+.nav-border {
+  border: 3px solid #d4a017;        /* Warm gold */
+  border-radius: 22px;               /* Soft rounded box */
+  padding: 8px;
+  margin: 10px auto;
+  background: #706f6c;               /* Soft warm background */
+  box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+}
+
+/* NAVBAR */
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Nav links */
+.nav-links li a {
+  padding: 8px 14px;
+  border-radius: 14px;                /* Button rounding */
+  transition: 0.3s;
+  font-weight: 600;
+}
+
+/* African hover colors */
+.nav-links li a:hover {
+  background: #d4a017;               /* Gold */
+  color: white;
+}
+
+/* DROPDOWN MENU */
+.dropdown-menu {
+  background: #fffbe8;                /* Light African tone */
+  border: 2px solid #d4a017;
+  border-radius: 16px;
+  padding: 8px 0;
+}
+
+.dropdown-menu li a:hover {
+  background: #d97706;                /* warm African orange */
+  color: #fff;
+}
+
+/* Hamburger button rounded */
+.hamburger {
+  border-radius: 12px;
+  padding: 6px 10px;
+  border: 2px solid #d4a017;
+  background: #fff7db;
+}
+
+/* Dark mode */
+body.dark .nav-border {
+  background: #2e2e2e;
+  border-color: #facc15;              /* Bright African gold */
+}
+
+body.dark .nav-links li a:hover {
+  background: #facc15;
+  color: #000;
+}

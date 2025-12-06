@@ -58,3 +58,14 @@
     width: 100%;
   }
 }
+
+/* MOBILE NAV */
+@media (max-width: 768px) {
+  .nav-links {
+    flex-direction: column;
+    background: #fff8e6;
+    border-radius: 18px;
+    border: 2px solid #d4a017;
+    padding: 10px 0;
+  }
+}
